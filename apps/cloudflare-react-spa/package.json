@@ -4,7 +4,7 @@
   "description": "",
   "main": "index.js",
   "scripts": {
-    "start": "cd frontend && pnpm run dev",
+    "start": "wrangler dev",
     "deploy": "pnpm run build && wrangler deploy",
     "build": "cd frontend && pnpm build"
   },
