@@ -62,7 +62,7 @@
     "infra:prod:edge:plan": "terraform -chdir=infra/envs/prod/edge plan",
     "infra:prod:edge:apply": "terraform -chdir=infra/envs/prod/edge apply",
     "infra:prod:edge:destroy": "terraform -chdir=infra/envs/prod/edge destroy",
-    "cloudflare-react-spa:dev": "pnpm --filter frontend dev",
+    "cloudflare-react-spa:dev": "cd apps/cloudflare-react-spa && pnpm wrangler dev",
     "cloudflare-react-spa:build": "pnpm --filter cloudflare-react-spa build",
     "cloudflare-react-spa:deploy": "pnpm run cloudflare-react-spa:build && cd apps/cloudflare-react-spa && pnpm wrangler deploy"
   },
