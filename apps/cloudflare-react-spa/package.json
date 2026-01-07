@@ -1,0 +1,22 @@
+{
+  "name": "cloudflare-react-spa",
+  "version": "1.0.0",
+  "description": "",
+  "main": "index.js",
+  "scripts": {
+    "start": "wrangler dev",
+    "deploy": "pnpm run build && wrangler deploy",
+    "build": "cd frontend && pnpm build"
+  },
+  "keywords": [],
+  "author": "",
+  "license": "ISC",
+  "packageManager": "pnpm@10.11.1",
+  "dependencies": {
+    "hono": "^4.11.3"
+  },
+  "devDependencies": {
+    "@cloudflare/workers-types": "^4.20251231.0",
+    "wrangler": "^4.54.0"
+  }
+}
