@@ -2,7 +2,7 @@ import React from "react";
 import { Button } from "@/components/ui/button";
 
 function App() {
-  const [data, setData] = React.useState(null);
+  const [data, setData] = React.useState<{ message: string; timestamp: string } | null>(null);
 
   console.log("App component rendered");
 
