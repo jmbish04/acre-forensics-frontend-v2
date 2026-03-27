@@ -17,6 +17,7 @@ export const envSchema = z.object({
   OPENAI_API_KEY: z.string(),
   RESEND_API_KEY: z.string(),
   RESEND_EMAIL_FROM: z.email(),
+  GITHUB_TOKEN: z.string().optional(),
 });
 
 /**
