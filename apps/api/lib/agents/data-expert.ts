@@ -64,69 +64,68 @@ export class DBIDataExpertAgent extends BaseAgent<Env, AgentState> {
     );
 
     for (let i = 0; i < selected.length; i++) {
-      for (const k of Object.keys(this.SocrataDatasets) as SodaDatasetKey[]) {
-        const ds = this.SocrataDatasets[k];
-        const where: string[] = [...commonWhere];
+      const k = selected[i];
+      const ds = this.SocrataDatasets[k];
+      const where: string[] = [...commonWhere];
 
-        if (ds.dateField && payload.dateRange)
-          where.push(
-            `${ds.dateField} BETWEEN '${this.escapeSoql(payload.dateRange.start)}' AND '${this.escapeSoql(payload.dateRange.end)}'`,
-          );
-        if (geo)
-          where.push(
-            this.withinCircle("location", geo.lat, geo.lon, geo.radiusMeters),
-          );
-        if (payload.keywords?.length)
-          where.push(
-            this.soqlLikeAny(
-              "description",
-              payload.keywords.map((kw) => `%${kw}%`),
-            ),
-          );
-
-        if (contractorWildcards.length && ds.contractorFields.length) {
-          const orGroups = ds.contractorFields.map((f: string) =>
-            this.soqlLikeAny(f, contractorWildcards),
-          );
-          where.push(
-            orGroups.length > 1 ? `(${orGroups.join(" OR ")})` : orGroups[0],
-          );
-        }
-
-        const order = ds.permitIdField
-          ? `${ds.permitIdField} ASC`
-          : ds.dateField
-            ? `${ds.dateField} ASC`
-            : undefined;
-
-        await this.logRequest(requestId, "info", `querying ${String(k)}`, {
-          datasetId: ds.id,
-        });
-        await this.progress(
-          requestId,
-          Math.min(0.9, (i / selected.length) * 0.9),
-          { phase: "fetch", dataset: k },
+      if (ds.dateField && payload.dateRange)
+        where.push(
+          `${ds.dateField} BETWEEN '${this.escapeSoql(payload.dateRange.start)}' AND '${this.escapeSoql(payload.dateRange.end)}'`,
+        );
+      if (geo)
+        where.push(
+          this.withinCircle("location", geo.lat, geo.lon, geo.radiusMeters),
+        );
+      if (payload.keywords?.length)
+        where.push(
+          this.soqlLikeAny(
+            "description",
+            payload.keywords.map((kw) => `%${kw}%`),
+          ),
         );
 
-        let offset = 0;
-        while (true) {
-          const rows = await soda.queryDataset<any[]>(ds.id, {
-            where,
-            order,
-            limit,
-            offset,
+      if (contractorWildcards.length && ds.contractorFields.length) {
+        const orGroups = ds.contractorFields.map((f: string) =>
+          this.soqlLikeAny(f, contractorWildcards),
+        );
+        where.push(
+          orGroups.length > 1 ? `(${orGroups.join(" OR ")})` : orGroups[0],
+        );
+      }
+
+      const order = ds.permitIdField
+        ? `${ds.permitIdField} ASC`
+        : ds.dateField
+          ? `${ds.dateField} ASC`
+          : undefined;
+
+      await this.logRequest(requestId, "info", `querying ${String(k)}`, {
+        datasetId: ds.id,
+      });
+      await this.progress(
+        requestId,
+        Math.min(0.9, (i / selected.length) * 0.9),
+        { phase: "fetch", dataset: k },
+      );
+
+      let offset = 0;
+      while (true) {
+        const rows = await soda.queryDataset<any[]>(ds.id, {
+          where,
+          order,
+          limit,
+          offset,
+        });
+        if (!Array.isArray(rows) || rows.length === 0) break;
+        for (const r of rows)
+          await this.saveRow(requestId, ds.entity, r, ds.id);
+        offset += rows.length;
+        if (rows.length < limit) break;
+        if (offset > 20_000) {
+          await this.logRequest(requestId, "warn", "cap reached (20k rows)", {
+            dataset: k,
           });
-          if (!Array.isArray(rows) || rows.length === 0) break;
-          for (const r of rows)
-            await this.saveRow(requestId, ds.entity, r, ds.id);
-          offset += rows.length;
-          if (rows.length < limit) break;
-          if (offset > 20_000) {
-            await this.logRequest(requestId, "warn", "cap reached (20k rows)", {
-              dataset: k,
-            });
-            break;
-          }
+          break;
         }
       }
     }
