@@ -9,7 +9,7 @@ import { Octokit } from '@octokit/rest'
 import { graphql } from '@octokit/graphql'
 import { retry } from '@octokit/plugin-retry'
 import { throttling } from '@octokit/plugin-throttling'
-import { Env as Bindings } from '../../types'
+import { Env as Bindings } from '../../../env'
 
 const MyOctokit = Octokit.plugin(retry, throttling)
 
