@@ -187,21 +187,25 @@ export async function rewriteQuestionForMCP(
 ): Promise<string> {
   const systemPrompt = `You are a technical documentation assistant. Rewrite the user question to be clear, comprehensive, and well-suited for querying Cloudflare documentation.`;
 
-  let contextStr = "";
+  const contextParts: string[] = [];
   if (context) {
     if (context.bindings?.length)
-      contextStr += `Bindings: ${context.bindings.join(", ")}\n`;
+      contextParts.push(`Bindings: ${context.bindings.join(", ")}\n`);
     if (context.libraries?.length)
-      contextStr += `Libraries: ${context.libraries.join(", ")}\n`;
+      contextParts.push(`Libraries: ${context.libraries.join(", ")}\n`);
     if (context.tags?.length)
-      contextStr += `Tags: ${context.tags.join(", ")}\n`;
+      contextParts.push(`Tags: ${context.tags.join(", ")}\n`);
     if (context.codeSnippets?.length) {
-      contextStr += `\nCode Context:\n${context.codeSnippets
-        .map((s: any) => `File: ${s.file_path} (${s.relation})\n${s.code}`)
-        .join("\n\n")}`;
+      contextParts.push("\nCode Context:\n");
+      contextParts.push(
+        context.codeSnippets
+          .map((s: any) => `File: ${s.file_path} (${s.relation})\n${s.code}`)
+          .join("\n\n"),
+      );
     }
   }
 
+  const contextStr = contextParts.join("");
   const prompt = `Original Question: ${question}\n\n${contextStr}\nRewrite this question with technical precision for a search engine.`;
 
   const schema = {
@@ -329,9 +333,9 @@ export async function generateEmbeddingGemini(
 
     // Check SDK return type structure - @google/genai usually returns { embeddings: [{ values: [...] }] }
     const embedding = response?.embeddings?.[0];
-    
+
     if (!embedding?.values) {
-        throw new Error("Invalid embedding response from Gemini");
+      throw new Error("Invalid embedding response from Gemini");
     }
 
     return embedding.values as number[];
