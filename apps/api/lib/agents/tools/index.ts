@@ -1,7 +1,8 @@
 import * as sandbox from "./sandbox";
-import * as 'cloudflare-mcp' fron './cloudflare-mcp'
+import * as socrata from "./socrata";
+import * as cloudflareMcp from "./cloudflare-mcp";
 
-export { sandbox, socrata };
+export { sandbox, socrata, cloudflareMcp };
 
 export type { SodaDatasetKey } from "./socrata";
 
@@ -22,4 +23,3 @@ export function getAllTools(env: Env) {
     new socrata.SocrataQueryTool(env),
   ];
 }
-

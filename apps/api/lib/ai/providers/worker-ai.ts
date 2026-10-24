@@ -299,21 +299,26 @@ export async function rewriteQuestionForMCP(
     codeSnippets?: Array<{ file_path: string; code: string; relation: string }>;
   },
 ): Promise<string> {
-  let prompt = `Original Question: ${question}\n\n`;
+  const promptParts: string[] = [`Original Question: ${question}\n\n`];
 
   if (context) {
     if (context.bindings?.length)
-      prompt += `Bindings: ${context.bindings.join(", ")}\n`;
+      promptParts.push(`Bindings: ${context.bindings.join(", ")}\n`);
     if (context.libraries?.length)
-      prompt += `Libraries: ${context.libraries.join(", ")}\n`;
-    if (context.tags?.length) prompt += `Tags: ${context.tags.join(", ")}\n`;
+      promptParts.push(`Libraries: ${context.libraries.join(", ")}\n`);
+    if (context.tags?.length)
+      promptParts.push(`Tags: ${context.tags.join(", ")}\n`);
     if (context.codeSnippets?.length) {
-      prompt += `\nCode Context:\n`;
+      promptParts.push(`\nCode Context:\n`);
       context.codeSnippets.forEach((s) => {
-        prompt += `File: ${s.file_path} (${s.relation})\n${s.code.substring(0, 500)}...\n\n`;
+        promptParts.push(
+          `File: ${s.file_path} (${s.relation})\n${s.code.substring(0, 500)}...\n\n`,
+        );
       });
     }
   }
+
+  const prompt = promptParts.join("");
 
   const schema = {
     type: "object",
