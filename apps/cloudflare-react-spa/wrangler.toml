@@ -1,0 +1,7 @@
+name = "cloudflare-react-spa"
+main = "src/index.ts"
+compatibility_date = "2024-07-22"
+
+[assets]
+directory = "./frontend/dist"
+binding = "ASSETS"
