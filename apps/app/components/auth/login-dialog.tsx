@@ -7,6 +7,7 @@ import {
   DialogTitle,
   DialogTrigger,
 } from "@repo/ui";
+import { useQueryClient } from "@tanstack/react-query";
 import * as React from "react";
 import { LoginForm } from "./login-form";
 
@@ -18,6 +19,7 @@ import { LoginForm } from "./login-form";
  * in contexts where the user should stay on the current page after signing in.
  */
 export function LoginDialog() {
+  const queryClient = useQueryClient();
   const [open, setOpen] = React.useState(false);
 
   const handleSuccess = () => {
@@ -25,8 +27,9 @@ export function LoginDialog() {
     // to continue on the same page that triggered the login requirement.
     // React Query will automatically refetch protected data after auth state changes.
     setOpen(false);
-    // TODO: Consider invalidating specific queries if immediate data refresh needed:
-    // queryClient.invalidateQueries({ queryKey: ["protected-data"] })
+
+    // Refresh protected data queries immediately after login
+    queryClient.invalidateQueries({ queryKey: ["protected-data"] });
   };
 
   return (
@@ -61,13 +64,15 @@ export function LoginDialog() {
  * WARNING: Only one instance should be mounted to avoid conflicts.
  */
 export function useLoginDialog() {
+  const queryClient = useQueryClient();
   const [open, setOpen] = React.useState(false);
 
   const LoginDialog = React.useCallback(() => {
     const handleSuccess = () => {
       setOpen(false);
-      // Post-auth behavior handled by React Query's automatic refetching
-      // and the auth error boundary's session invalidation
+
+      // Refresh protected data queries immediately after login
+      queryClient.invalidateQueries({ queryKey: ["protected-data"] });
     };
 
     return (
